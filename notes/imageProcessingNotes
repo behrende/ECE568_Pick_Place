@@ -1,0 +1,15 @@
+The simple script I whipped up gave me a couple ideas on what we could do for this robot moving forward. 
+
+Thoughts: 
+    Implement some sort of queue, wait for 100 iterations on our while loop, then save the values of our objects to a queue based on "distance to arm". We just go through our queue, 
+if an object is moved, then it's new coordinates are added to the back of the queue. If we match the coordinates with a location and there is no object, then dump, 
+if there is a match then we go to the movement phase, and idle communication between our camera and the robotic arm. This allows us to move our objects in real time. 
+
+
+
+Tasks moving forward for image processing: 
+-Convert Current XY Coordinates based on our environment. 
+-Create queue to store object structures collected in our image 
+-Train and implement new YOLO Model with updated weights and labels 
+-Determine method of image ingestion (Live video, one image at a time)
+    -Realistically, we just need to send location packets over wifi when there is a match, this way we can send packets over WIFI when there is a match. 
