@@ -1,0 +1,12 @@
+The simple script I whipped up gave me a couple ideas on what we could do for this robot moving forward. 
+
+
+Implement some sort of queue, wait for 100 iterations on our while loop, then save the values of our objects to a queue based on "distance to arm", and then if the ovbjects are moved around then add them to the back of the queue in the same order. We just go through our queue, if we match the coordinates with a location and there is no object, then dump, if there is a match then we go to the movement phase. This allows us to move our objects in real time. If we wanted to pursue Real time Object Detection, if we are doing it image based then it is less complex. If we detect movement perhaps we go into an idle state where we don't store any new packets so that we don't try to grab an object when objects are being shuffled. This is a luxery and not necessary though. Should more strongly define what our end goal is here. 
+
+
+Tasks moving forward for image processing: 
+-Convert Current XY Coordinates based on our environment. 
+-Create queue to store object structures collected in our image 
+-Train and implement new YOLO Model with updated weights and labels 
+-Determine method of image ingestion (Live video, one image at a time)
+    -Realistically, we just need to send location packets over wifi when there is a match, this way we can send packets over WIFI when there is a match. 
