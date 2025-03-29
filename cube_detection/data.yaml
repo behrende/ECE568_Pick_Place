@@ -1,0 +1,14 @@
+# NOTE: change hard code path
+train: c:/users/alexl/ECE568_Pick_Place/cube_detection/train/images
+val: c:/users/alexl/ECE568_Pick_Place/cube_detection/valid/images
+test: c:/users/alexl/ECE568_Pick_Place/cube_detection/test/images
+
+nc: 3
+names: ['bluecube', 'green cube', 'red cube']
+
+roboflow:
+  workspace: alexlinys
+  project: red-green-blue-cube-detection-za1vb
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/alexlinys/red-green-blue-cube-detection-za1vb/dataset/1

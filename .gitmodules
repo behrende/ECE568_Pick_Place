@@ -1,0 +1,6 @@
+[submodule "ECE568_Pick_Place.wiki"]
+	path = ECE568_Pick_Place.wiki
+	url = https://github.com/behrende/ECE568_Pick_Place.wiki.git
+[submodule "roarm_m2"]
+	path = roarm_m2
+	url = https://github.com/waveshareteam/roarm_m2.git
