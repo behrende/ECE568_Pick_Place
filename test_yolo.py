@@ -1,16 +1,21 @@
+import argparse
 import cv2
 from ultralytics import YOLO
 
-image_path = "img4.jpg"
-model = YOLO("./models/yolo_cubes.pt")
+parser = argparse.ArgumentParser(description="Process an image file path.")
+parser.add_argument("--image_path", default="cube1.png", type=str, help="Path to the image file")
+
+args = parser.parse_args()
+
+model = YOLO("./models/colorcubes2.pt")
 # results = model.predict(image_path)
 # print(results)
 
 # Load an image
-image = cv2.imread(image_path)
+image = cv2.imread("./test_images/" + args.image_path)
 
 # Perform inference
-results = model(image)
+results = model.predict(image, conf=0.1)
 
 # Get bounding boxes and coordinates
 for result in results:
@@ -26,7 +31,7 @@ for result in results:
         cls_id = int(box.cls[0].item())
         label = model.names[cls_id]
         cv2.putText(image, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-        print("Object: " + str(label) + " X: " + str(cx) + " Y: " + str(cy))        
+        print(f"Object: {label} X: {cx} Y: {cy} Confidence score {conf}")        
 
 # Save and display the image with boxes
 cv2.imwrite("cube_detection.jpg", image)

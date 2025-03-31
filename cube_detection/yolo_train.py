@@ -6,11 +6,18 @@ os.environ['TORCH_USE_CUDA_DSA'] = '1'
 
 if __name__=='__main__':
     # Load a model
-    model = YOLO("../yolo11n.pt")  # load a pretrained model (recommended for training)
+    model = YOLO("yolo11s.pt")  # load a pretrained model (recommended for training)
     model.to('cuda')
 
     # Train the model
-    results = model.train(data="./data.yaml", epochs=100, imgsz=640, batch=0.9)
+    results = model.train(data="./colorcubes_v1i/data.yaml", 
+                          lr0=0.01,
+                          lrf=0.01,
+                          epochs=300, 
+                          imgsz=640, 
+                          batch=0.9,
+                          plots=True,
+                          optimizer='SGD')
 
     # Save the trained model
-    model.save("../models/non_cuda_yolo_cubes.pt")  # Save the model to a file
+    model.save("../models/colorcubes2.pt")  # Save the model to a file
