@@ -1,5 +1,6 @@
 import argparse
 import cv2
+import time
 from ultralytics import YOLO
 
 parser = argparse.ArgumentParser(description="Process an image file path.")
@@ -13,6 +14,9 @@ model = YOLO("./models/colorcubes2.pt")
 
 while True:
     image_path = input("Enter the image path: ")
+
+    start_time = time.perf_counter()
+
     # Load an image
     image = cv2.imread("./test_images/" + image_path)
 
@@ -34,6 +38,10 @@ while True:
             label = model.names[cls_id]
             cv2.putText(image, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
             print(f"Object: {label} X: {cx} Y: {cy} Confidence score {conf}")        
+
+    end_time = time.perf_counter()
+
+    print(f"Time taken for inference: {end_time - start_time:.2f}")
 
     # Save and display the image with boxes
     cv2.imwrite("cube_detection.jpg", image)
