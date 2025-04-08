@@ -21,9 +21,9 @@ def main():
             out = multifruit.run_model(model,frame)
             annotate = out[0].plot()
             cv2.imshow('yolov8n cam', annotate)
-            coordinates = multifruit.grab_xy(model,out)
-            color = multifruit.grab_color(out, frame)
-
+            data = multifruit.grab_block_info(model,out)
+            #color = multifruit.grab_color(out, frame)
+            print(color)
             # Check for incoming frames, if none then kill screen 
             if not ret:
                 print("Can't receive frame. Exiting ...")
@@ -40,19 +40,22 @@ def main():
         annotate = out[0].plot()
         #cv2.imshow('yolov8n cam', annotate)
         cv2.waitKey(0)
-        coordinates = multifruit.grab_xy(model,out)
-        color = multifruit.grab_color(out, image)
+        box_info = multifruit.grab_block_info(model,out,image)
+        #color = multifruit.grab_color(out, image)
         
         #Handle Packet
-        assert len(coordinates) == len(color), "Functions must be the same size"
+        #No longer need to assert lengths because it's in the same structure 
+       # assert len(coordinates) == len(color), "Functions must be the same size"
         packets = []
-        for i, (x,y) in enumerate(coordinates):
-            c = color[i]
-            X = coordinates[0]["X"]
-            Y = coordinates[0]["Y"]
-
-            packets.append(comms.create_packet(c, X, Y))
-        print(packets)
+        for i in range(len(box_info)):
+            R = box_info[i]["R"]
+            G = box_info[i]["G"]
+            B = box_info[i]["B"]
+            X = box_info[i]["X"]
+            Y = box_info[i]["Y"]
+            
+            packets.append(comms.create_packet(R,G,B,X,Y))
+        #print(packets)
 
         #Send packet data
         #for packet in packets:

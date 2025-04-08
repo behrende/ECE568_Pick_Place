@@ -34,15 +34,14 @@ def receive_tcp_data(server, buffer_size=1024):
 
     
 
-def create_packet(color, X, Y):
-    r,g,b = color
+def create_packet(R,G,B, X, Y):
     #print(type(r))
    # print(type(g))
   #  print(type(b))
  #   print(type(x))
 #    print(type(y))
 
-    return struct.pack('>iiidd',r,g,b,X,Y)
+    return struct.pack('>iiidd',R,G,B,X,Y)
 
 
 def send_tcp_data(client_socket, data):

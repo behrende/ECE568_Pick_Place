@@ -2,9 +2,6 @@ from ultralytics import YOLO
 import cv2
 
 
-
-
-
 def init_cam():
     #Init models and camera
     model = YOLO("yolov8n.pt")
@@ -20,7 +17,7 @@ def run_model(model,frame):
     return results
 
 #Display Coordinates
-def grab_xy(model,out):
+def grab_block_info(model,out,image):
     box_info = [] 
     for box in out[0].boxes:
         x1,y1,x2,y2 = box.xyxy[0].tolist()
@@ -28,24 +25,13 @@ def grab_xy(model,out):
         cy = (y1 + y2) / 2
         cls_id = int(box.cls[0].item())
         label = model.names[cls_id]
+        r,g,b = image[int(cy),int(cx)]
         print("Object: " + str(label) + " X: " + str(cx) + " Y: " + str(cy))
-        data_xy =  {"X": cx,"Y": cy } 
-        box_info.append(data_xy)
+        data =  {"R" : r, "G": g, "B": b,"X": int(cx),"Y": int(cy) } 
+        print(data)
+        box_info.append(data)
 
     return box_info
 
 
-#Grab Color from Bounded Block and Return RGB
-def grab_color(out, image):
-    color_list = []  
-    for box in out[0].boxes:
-        # Assuming box.xyxy gives [x1, y1, x2, y2] as floats or tensors
-        x1, y1, x2, y2 = map(int, box.xyxy[0])  # Convert to integers
-        # Crop region from the image
-        region = image[y1:y2, x1:x2]
-        # Compute average color (BGR by default if using OpenCV)
-        if region.size > 0:
-            mean_color = region.mean(axis=(0, 1))  # [B, G, R] or [R, G, B]
-            color_list.append(tuple(map(int, mean_color)))
-    
-    return color_list
+
