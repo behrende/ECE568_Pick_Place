@@ -37,7 +37,7 @@ while True:
             cls_id = int(box.cls[0].item())
             label = model.names[cls_id]
             cv2.putText(image, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            print(f"Object: {label} X: {cx} Y: {cy} Confidence score {conf}")        
+            print(f"Object: {label} X_mid: {cx} Y_mid: {cy}, X1:{x1},X2:{x2},Y1:{y1},Y2:{y2} Confidence score {conf}")
 
     end_time = time.perf_counter()
 
