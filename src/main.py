@@ -58,8 +58,7 @@ def main():
         #print(packets)
 
         #Send packet data
-        #for packet in packets:
-            #comms.send_tcp_data(client, packet)
+        comms.send_tcp_data(client, packets)
 
     cam.release() 
     cv2.destroyAllWindows()
