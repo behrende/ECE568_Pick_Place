@@ -50,7 +50,7 @@ def color_sort(hashed_packet):
     for color_index, color in enumerate(color_order): 
         packets = new_hash[color]
         xstart = xneg
-        for i, val in enumerate(packet): 
+        for i, val in enumerate(packets): 
 
              # Assign new XY coordinates
             packet["X"] = x_start + i * x_spacing
