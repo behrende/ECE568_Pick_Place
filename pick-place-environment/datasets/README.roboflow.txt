@@ -1,8 +1,8 @@
 
-ece568 color cubes - v5 2025-04-15 7:14pm
+ece568 color cubes - v6 2025-04-16 12:26am
 ==============================
 
-This dataset was exported via roboflow.com on April 16, 2025 at 5:33 AM GMT
+This dataset was exported via roboflow.com on April 17, 2025 at 6:24 AM GMT
 
 Roboflow is an end-to-end computer vision platform that helps you
 * collaborate with your team on computer vision projects
@@ -17,8 +17,8 @@ visit https://github.com/roboflow/notebooks
 
 To find over 100k other datasets and pre-trained models, visit https://universe.roboflow.com
 
-The dataset includes 138 images.
-Color-cubes are annotated in YOLOv11 format.
+The dataset includes 137 images.
+Color-cubes are annotated in YOLOv8 format.
 
 The following pre-processing was applied to each image:
 * Auto-orientation of pixel data (with EXIF-orientation stripping)
