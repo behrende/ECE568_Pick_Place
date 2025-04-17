@@ -1,13 +1,14 @@
 import numpy as np
 import cv2
 import multifruit
-import comms
-
+import sortlogic
+import PickAndPlace_IO_serial
 #Single Image or Video Mode
 mode = False 
 #Socket Reciever Info 
 IP = '127.0.0.1'
 PORT = 65432
+
 
 def main():
     model,cam = multifruit.init_cam()
@@ -56,11 +57,30 @@ def main():
             
             packets.append(comms.create_packet(R,G,B,X,Y))
         #print(packets)
-
+        #Sort_packet
         #Send packet data
-        comms.send_tcp_data(client, packets)
+
+        #color Sorted Packets
+        hashed_packet = sortlogic.packet_hash(packets)
+        #Color sorted packets with new coordinates 
+        new_coords = sortlogic.color_sort(hashed_packet)
+
+
+
+        #UART       
 
     cam.release() 
     cv2.destroyAllWindows()
 if __name__ == "__main__":
     main()
+
+
+
+
+
+
+
+
+#Sand box 
+
+
