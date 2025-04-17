@@ -8,7 +8,7 @@ parser.add_argument("--image_path", default="cube1.png", type=str, help="Path to
 
 args = parser.parse_args()
 
-model = YOLO("./models/colorcubes2.pt")
+model = YOLO("./models/colorcubes6.pt")
 # results = model.predict(image_path)
 # print(results)
 
@@ -21,7 +21,7 @@ while True:
     image = cv2.imread("./test_images/" + image_path)
 
     # Perform inference
-    results = model.predict(image, conf=0.1)
+    results = model.predict(image, conf=0.5)
 
     # Get bounding boxes and coordinates
     for result in results:

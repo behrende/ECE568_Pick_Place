@@ -1,0 +1,13 @@
+train: train/images
+val: valid/images
+test: test/images
+
+nc: 6
+names: ['bluecube', 'greencube', 'orangecube', 'purplecube', 'redcube', 'yellowcube']
+
+roboflow:
+  workspace: alexlinys
+  project: ece568-color-cubes
+  version: 5
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/alexlinys/ece568-color-cubes/dataset/5

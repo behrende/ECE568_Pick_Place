@@ -1,0 +1,18 @@
+name: pick-place-gpu-environment
+channels:
+  - pytorch
+  - nvidia
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pytorch=2.1.0
+  - torchvision=0.16.0
+  - torchaudio=2.1.0
+  - pytorch-cuda=12.1
+  - pip
+  - pip:
+      - ultralytics>=8.0.0
+      - opencv-python
+      - matplotlib
+      - pyyaml

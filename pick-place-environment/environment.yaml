@@ -1,0 +1,16 @@
+name: pick-place-environment
+channels:
+  - defaults
+  - conda-forge
+  - pytorch
+dependencies:
+  - python=3.10
+  - pip
+  - pytorch
+  - torchvision
+  - numpy
+  - opencv
+  - matplotlib
+  - pyyaml
+  - pip:
+      - ultralytics==8.0.166

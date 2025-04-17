@@ -41,3 +41,8 @@ class StaticCamTransform:
         delta_y = (obj1_y_mid - obj2_y_mid) * self.px_to_roboy
 
         return delta_x, delta_y
+
+if __name__ == "__main__":
+    transform = StaticCamTransform(
+        
+    )
