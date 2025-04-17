@@ -6,13 +6,14 @@ channels:
   - conda-forge
 dependencies:
   - python=3.10
-  - pytorch=2.1.0
-  - torchvision=0.16.0
-  - torchaudio=2.1.0
-  - pytorch-cuda=12.1
   - pip
+  - pytorch
+  - pytorch-cuda
+  - torchvision
+  - torchaudio
+  - numpy
+  - opencv
+  - matplotlib
+  - pyyaml
   - pip:
-      - ultralytics>=8.0.0
-      - opencv-python
-      - matplotlib
-      - pyyaml
+      - ultralytics==8.0.166

@@ -8,7 +8,7 @@ from tkinter import filedialog
 root = tk.Tk()
 root.withdraw()  # Hide the main tkinter window
 
-model = YOLO("runs/detect/train15/weights/best.pt")
+model = YOLO("runs/detect/train29/weights/best.pt")
 
 keep_running = True
 while keep_running:

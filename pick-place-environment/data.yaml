@@ -8,6 +8,6 @@ names: ['bluecube', 'greencube', 'orangecube', 'purplecube', 'redcube', 'yellowc
 roboflow:
   workspace: alexlinys
   project: ece568-color-cubes
-  version: 5
+  version: 6
   license: CC BY 4.0
-  url: https://universe.roboflow.com/alexlinys/ece568-color-cubes/dataset/5
+  url: https://universe.roboflow.com/alexlinys/ece568-color-cubes/dataset/6
