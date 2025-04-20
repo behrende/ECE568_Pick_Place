@@ -8,7 +8,7 @@ parser.add_argument("--image_path", default="cube1.png", type=str, help="Path to
 
 args = parser.parse_args()
 
-model = YOLO("./models/colorcubes6.pt")
+model = YOLO("./pick-place-environment\runs\detect\train29\weights\best.pt")
 # results = model.predict(image_path)
 # print(results)
 
