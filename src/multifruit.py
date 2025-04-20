@@ -26,7 +26,7 @@ def grab_block_info(model,out,image):
         cls_id = int(box.cls[0].item())
         label = model.names[cls_id]
         r,g,b = image[int(cy),int(cx)]
-        print("Object: " + str(label) + " X: " + str(cx) + " Y: " + str(cy))
+        print(f"Object: {label}, X_Avg: {cx:.2f}, Y_Avg: {cy:.2f}, x1 = {x1},x2 = {x2},y1 = {y1},y2 = {y2}, RGB: R: {r}, G: {g}, B: {b}")
         data =  {"R" : r, "G": g, "B": b,"X": int(cx),"Y": int(cy) } 
         print(data)
         box_info.append(data)

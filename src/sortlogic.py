@@ -1,6 +1,7 @@
 #Python Sort Logic for the MicroProcessor
-
-
+import cv2
+import numpy as np
+import json
 
 #Sandbox for Incoming Sort Logic 
 
@@ -20,10 +21,13 @@ def packet_hash(packets):
     color_hash = {color: [] for color in color_ranges}
 
     for packet in packets:
-        current = (packet["R"],packet["G"],packet["B"])
+        print(packet)
+        current = (packet["R"], packet["G"], packet["B"])
+        hsv = cv2.cvtColor(np.uint8([[current]]), cv2.COLOR_RGB2HSV)[0][0]
+        # Check if the color is within the defined ranges
         matched = False
         for color, (low,high) in color_ranges.items(): 
-            if all(high[i] >= current[i] >= low[i] for i in range(3)):
+            if all(high[i] >= hsv[i] >= low[i] for i in range(3)):
                 color_hash[color].append(current) 
                 matched = True 
                 break 
@@ -37,22 +41,28 @@ def packet_hash(packets):
 def color_sort(hashed_packet): 
         #XY Length in mm hardwaire later 
     new_hash = hashed_packet
+    # Define the coordinates for the Blocks
     xpos,xneg = 200,-200 
     ypos,yneg = 600, 0
+    # Define the spacing between Blocks
     xspace = 40 
     yspace = 50
         #Create board coordinates
-    secleny = ypos / size(hashed_packet)
+    secleny = ypos / len(hashed_packet)
     ystart = ypos
         #Create coordinates 
     color_order = ["Red", "Orange", "Yellow", "Green", "Blue"]
+    for color in color_order:
+        if color in hashed_packet:
+            for i, packet in enumerate(hashed_packet[color]):
+                # Assign new coordinates
+                if i % 2 == 0:  # Even index
+                    packet["X"] = xpos
+                    packet["Y"] = ystart - (i // 2) * yspace
+                else:  # Odd index
+                    packet["X"] = xneg
+                    packet["Y"] = ystart - ((i - 1) // 2) * yspace
 
-    for color_index, color in enumerate(color_order): 
-        packets = new_hash[color]
-        xstart = xneg
-        for i, val in enumerate(packets): 
-
-             # Assign new XY coordinates
-            packet["X"] = x_start + i * x_spacing
-            packet["Y"] = y_start - color_index * y_spacing
+                # Update the new_hash with the modified packet
+                new_hash[color][i] = packet
     return new_hash

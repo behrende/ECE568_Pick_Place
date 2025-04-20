@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import multifruit
 import sortlogic
-import PickAndPlace_IO_serial
+import comms 
 #Single Image or Video Mode
 mode = False 
 #Socket Reciever Info 
@@ -24,7 +24,6 @@ def main():
             cv2.imshow('yolov8n cam', annotate)
             data = multifruit.grab_block_info(model,out)
             #color = multifruit.grab_color(out, frame)
-            print(color)
             # Check for incoming frames, if none then kill screen 
             if not ret:
                 print("Can't receive frame. Exiting ...")
@@ -55,7 +54,8 @@ def main():
             X = box_info[i]["X"]
             Y = box_info[i]["Y"]
             
-            packets.append(comms.create_packet(R,G,B,X,Y))
+            #packets.append(comms.create_packet(R,G,B,X,Y))
+            packets.append({"R": R, "G": G, "B": B, "X": X, "Y": Y})
         #print(packets)
         #Sort_packet
         #Send packet data
@@ -64,12 +64,9 @@ def main():
         hashed_packet = sortlogic.packet_hash(packets)
         #Color sorted packets with new coordinates 
         new_coords = sortlogic.color_sort(hashed_packet)
+        
+        print(f"Result: {new_coords}")
 
-
-
-        #UART       
-
-    cam.release() 
     cv2.destroyAllWindows()
 if __name__ == "__main__":
     main()
