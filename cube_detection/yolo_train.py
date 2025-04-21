@@ -10,12 +10,11 @@ if __name__=='__main__':
     model.to('cuda')
 
     # Train the model
-    results = model.train(data="./colorcubes_v6i/data.yaml", 
+    results = model.train(data="./colorcubes_v7i/data.yaml", 
                           epochs=1000,
                           imgsz=640,
                           batch=0.9,
-                          plots=True,
-                          optimizer='SGD')
+                          plots=True)
 
     # Save the trained model
     model.save("../models/colorcubes7.pt")  # Save the model to a file

@@ -17,7 +17,7 @@ root.withdraw()  # Hide the main tkinter window
 model = YOLO("runs/detect/train29/weights/best.pt")
 
 CAM_PORT = 1
-PIXLE_TO_MM = 2.618
+PIXEL_TO_MM = 2.618
 GRIPPER_OPEN_ANGLE = 1.62
 GRIPPER_CLOSED_ANGLE = 3.24
 
@@ -43,10 +43,10 @@ class PickPlaceRobot:
         self.arm_z_pt = self.arm_z_home_cord
         self.arm_gripper_angle = self.arm_gripper_home_angle
 
-    def img_x_correrction(x_value):
+    def img_x_correction(self, x_value):
         return 1.021 * x_value - 1.0
 
-    def img_y_correrction(y_value):
+    def img_y_correction(self, y_value):
         return 0.96 * y_value + 5.28
     
     def reset_arm_postion(self):
@@ -111,10 +111,99 @@ class PickPlaceRobot:
         else: 
             raise Exception("No image detected. Please! try again")
 
-    def detect_cubes(self, image):
-        # Load an image
-        image = cv2.imread(image)
+    def detect_cubes_w_anchor(self, image):
+        objs_dist = []
+        image = cv2.imread('./test1.jpg')
 
+        # cube height
+        cube_pickup_height = -120
+
+        # Yellow cube (or any origin cube) location in Roboarm coordinates
+        yellow_origin_x_mm = 8
+        yellow_origin_y_mm = -85
+        
+        # Roboarm end effector has some offset error
+        pointer_offset_x_mm = 18
+        pointer_offset_y_mm = 0
+
+        # Perform inference
+        results = model.predict(image, conf=0.2)
+
+        center_x = 1920 / 2
+        center_y = 1080 / 2
+
+        for result in results:
+            for idx, box in enumerate(result.boxes):
+                x1, y1, x2, y2 = map(int, box.xyxy[0])  # Convert to integers
+                cx = (x1 + x2) / 2
+                cy = (y1 + y2) / 2
+                conf = box.conf[0].item()  # Confidence score
+                cls_id = int(box.cls[0].item())
+                label = model.names[cls_id]
+                distance_y = (cy - center_y) / PIXEL_TO_MM
+                distance_x = (cx - center_x) / PIXEL_TO_MM
+
+                # Apply correction
+                distance_y = self.img_y_correction(distance_y)
+                distance_x = self.img_x_correction(distance_x)
+
+                print(f"Idx: {idx}, Object: {label} X_mid: {cx} Y_mid: {cy}, X1:{x1},X2:{x2},Y1:{y1},Y2:{y2} Confidence score {conf}.\n")
+
+                if label == 'yellowcube':
+                    anchor_x = distance_x
+                    anchor_y = distance_y
+                    print(f"Anchor XY: {anchor_x}, {anchor_y}")
+
+        # Get bounding boxes and coordinates
+        for result in results:
+            for idx, box in enumerate(result.boxes):
+                x1, y1, x2, y2 = map(int, box.xyxy[0])  # Convert to integers
+                conf = box.conf[0].item()  # Confidence score
+                cls = int(box.cls[0].item())  # Class ID
+
+                # Draw bounding box
+                cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+
+                cx = (x1 + x2) / 2
+                cy = (y1 + y2) / 2
+
+                cv2.circle(image, (int(cx), int(cy)), radius=3, color=(0, 0, 255), thickness=-1)  # Red dot
+                cv2.putText(image, str(idx), (int(cx), int(cy)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                
+                cls_id = int(box.cls[0].item())
+                label = model.names[cls_id]
+                cv2.putText(image, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                distance_y = (cy - center_y) / PIXEL_TO_MM
+                distance_x = (cx - center_x) / PIXEL_TO_MM
+
+                # Apply correction
+                distance_y = self.img_y_correction(distance_y)
+                distance_x = self.img_x_correction(distance_x)
+
+                robo_x = (-(distance_y - anchor_y) + yellow_origin_x_mm + pointer_offset_x_mm)
+                robo_y = (-(distance_x - anchor_x) + yellow_origin_y_mm + pointer_offset_y_mm)
+
+                print(f"Idx: {idx}, Object: {label} X_mid: {cx} Y_mid: {cy}, X1:{x1},X2:{x2},Y1:{y1},Y2:{y2} Confidence score {conf}.\n")
+                print(f"    Distance from center in mm (x, y): {distance_x, distance_y}.\n")
+                print(f"    Roboarm (X,Y): {robo_x, robo_y}\n")
+
+                if label == 'redcube':
+                    objs_dist.append((robo_x, robo_y, cube_pickup_height))
+        
+        # Save and display the image with boxes
+        cv2.imwrite("cube_detection.jpg", image)
+
+        # Show the image in a window
+        # TODO: Fix a crash when closing the image window
+        # cv2.resize(image, (1000, 500))
+        cv2.namedWindow('Detection Results', cv2.WINDOW_GUI_EXPANDED)
+        cv2.imshow('Detection Results', image)
+        # cv2.resizeWindow('Detection Results', 1000, 500)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+        return objs_dist
+
+    def detect_cubes(self, image):
         # Perform inference
         results = model.predict(image, conf=0.1)
 
@@ -138,8 +227,8 @@ class PickPlaceRobot:
                 cls_id = int(box.cls[0].item())
                 label = model.names[cls_id]
                 cv2.putText(image, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-                distance_y = cy / PIXLE_TO_MM
-                distance_x = cx / PIXLE_TO_MM
+                distance_y = cy / PIXEL_TO_MM
+                distance_x = cx / PIXEL_TO_MM
 
                 print(f"Idx: {idx}, Object: {label} X_mid: {cx} Y_mid: {cy}, X1:{x1},X2:{x2},Y1:{y1},Y2:{y2} Confidence score {conf}. \
                       Distance from center in mm (x, y): {distance_x, distance_y}")
@@ -182,24 +271,26 @@ class PickPlaceRobot:
         return base_point
     
     def image_to_base(self, x_img, y_img):
-
-
-        
-
+        pass
 
     def pick_object(self):
         self.reset_arm_postion()
 
-        self.capture_image()
+        image = self.capture_image()
 
-        objs = self.detect_cubes()
+        # objs = self.detect_cubes(image)
+        objs = self.detect_cubes_w_anchor(image)
+        x_w_anchor, y_w_anchor, z_w_anchor = objs[0]
         
-        x_img, y_img = objs[0]
-        x, y, z = self.image_to_arm_base(x_img, y_img)
+        # x_img, y_img = objs[0]
+        # x, y, z = self.image_to_arm_base(x_img, y_img)
 
         self.open_gripper()
-        self.move_arm(x=x, y=y, z=z)
+        time.sleep(5)
+        self.move_arm(x=x_w_anchor, y=y_w_anchor, z=z_w_anchor)
+        time.sleep(5)
         self.close_gripper()
+        time.sleep(5)
         self.reset_arm_postion()
 
     def connect_arm(self):
@@ -225,5 +316,5 @@ class PickPlaceRobot:
 if __name__ == "__main__":
     arm = PickPlaceRobot("192.168.4.1")
 
-    arm.capture_image()
-    # arm.pick_object()
+    # arm.capture_image()
+    arm.pick_object()
