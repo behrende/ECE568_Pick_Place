@@ -40,6 +40,9 @@ def main():
         annotate = out[0].plot()
         #cv2.imshow('yolov8n cam', annotate)
         cv2.waitKey(0)
+
+
+
         box_info = multifruit.grab_block_info(model,out,image)
         #color = multifruit.grab_color(out, image)
         
@@ -59,14 +62,19 @@ def main():
         #print(packets)
         #Sort_packet
         #Send packet data
-
+        print(f"Packets: {packets}")
         #color Sorted Packets
         hashed_packet = sortlogic.packet_hash(packets)
         #Color sorted packets with new coordinates 
         new_coords = sortlogic.color_sort(hashed_packet)
         
+
+
+        print(f"Old Coords Packet:  {hashed_packet}")
         print(f"Result: {new_coords}")
 
+        assert new_coords == hashed_packet, "Packets must be the same size"
+        
     cv2.destroyAllWindows()
 if __name__ == "__main__":
     main()
