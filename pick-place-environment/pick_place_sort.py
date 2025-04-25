@@ -315,10 +315,11 @@ class PickPlaceRobot:
 
         #Sets initial Arm Position 
         self.reset_arm_postion()
-        image = self.capture_image()
+        #image = self.capture_image()
+        image = "./WIN_20250413_15_49_33_Pro.jpg"
 
-        # objs = self.detect_cubes(image)
-        objs = self.detect_cubes_w_anchor(image)
+        objs = self.detect_cubes(image)
+        #objs = self.detect_cubes_w_anchor(image)
 
 
         #Determine sort starting positions by color from anchor. 
@@ -331,7 +332,7 @@ class PickPlaceRobot:
         
         #color Map
         color_positions = {
-            color: [anchor_origin_x_mm, anchor_origin_y_mm + (i * 10), cube_pickup_height]
+            color: [anchor_origin_x_mm, anchor_origin_y_mm + (i * 25), cube_pickup_height]
             for i, color in enumerate(cubes_labels)
         }
 
@@ -342,7 +343,7 @@ class PickPlaceRobot:
             x, y, z, label = current
             # Calculate distance from anchor
             dist = math.sqrt((x - anchor_origin_x_mm)**2 + (y - anchor_origin_y_mm)**2)
-            obj_dist.append() (x, y, z, label,dist)
+            obj_dist.append([x, y, z, label , dist])
 
         # Sort objects by distance from anchor
         sorted_obj = sorted(obj_dist, key=lambda dist: dist[4])
@@ -365,16 +366,45 @@ class PickPlaceRobot:
         #             break
 
         #Color Map Update
-        for x, y, z, label in sorted_obj:
-            # Find the corresponding color start position
-            color_x, color_y, color_z = color_positions[label]
-            # Move Object
-            self.pick_object(x, y, z)
-            self.place_object(color_x, color_y, color_z)
-            time.sleep(1)
-            # Update color position for next object
-            color_positions[label][1] += 10
+        #for x, y, z, label,dist in sorted_obj:
+        while sorted_obj != []:
+            x, y, z, label, dist = sorted_obj[0]
+            try:
+                print(f"\nCurrent Color Positions: {color_positions}")
+                print(f"Current Queue:  {sorted_obj}")
+                # Find the corresponding color start position
+                color_x, color_y, color_z = color_positions[label]
 
+                print(f"\nOriginal XY ------    X: {x}, Y: {y}, Z: {z}, Label: {label}")
+                print(f"New XY ------ X: {color_x}, Y: {color_y}, Z: {color_z}, Label: {label}")
+
+                # Move Object   
+                        #Check if the current cube is within the 13mm boundary
+                
+                
+                # if any(x_sorted < color_x - 13 or x_sorted > color_x + 13 
+                #        or y_sorted < color_y - 13 or y_sorted > color_y + 13 
+                #        for x_sorted, y_sorted, _, _, _ in sorted_obj):
+                #     #check for obstructing objects. move to back of array if so
+                #     print(f"Object {label} is obstructing the path. Skipping for now...")
+                #     x_end, y_end, z_end, label_end, dist_end = sorted_obj[-1]
+                #     sorted_obj.remove([x, y, z, label,dist])
+                #     sorted_obj.append([x_end, y_end, z_end, label_end, dist_end])                    
+                #     continue
+
+                # Move to object position
+                self.pick_object(x, y, z)
+                self.place_object(color_x, color_y, color_z)
+
+                time.sleep(1)
+                
+                # Update x position for next object
+                color_positions[label][0] += 25
+                sorted_obj.remove([x, y, z, label,dist])
+
+            except Exception as e: 
+                print(f"An error occured {e}")
+                break
 
 
 
@@ -402,6 +432,6 @@ class PickPlaceRobot:
 
 if __name__ == "__main__":
     arm = PickPlaceRobot("192.168.4.1")
-
-    # arm.capture_image()
-    arm.sort_cubes
+    print("Test")
+    # arm.capture_image() 
+    arm.sort_cubes()
