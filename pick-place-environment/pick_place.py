@@ -43,6 +43,8 @@ class PickPlaceRobot:
         self.arm_z_pt = self.arm_z_home_cord
         self.arm_gripper_angle = self.arm_gripper_home_angle
 
+        self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
     def img_x_correction(self, x_value):
         return 1.021 * x_value - 1.0
 
@@ -89,6 +91,8 @@ class PickPlaceRobot:
     def capture_image(self):
         # initialize the camera 
         cam = cv2.VideoCapture(CAM_PORT) 
+        cam.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+        cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 
         # reading the input using the camera 
         result, image = cam.read() 
@@ -96,11 +100,10 @@ class PickPlaceRobot:
         # If image will detected without any error, show result 
         if result:
             # Show captured image.
-            cv2.imshow("Captured Image", image) 
+            cv2.imshow("Captured Image", image)
 
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             # Save Image
-            cv2.imwrite(f"CapturedImage_{timestamp}.png", image) 
+            cv2.imwrite(f"CapturedImage_{self.timestamp}.png", image) 
 
             # If keyboard interrupt occurs, destroy image window 
             cv2.waitKey(0) 
@@ -113,7 +116,7 @@ class PickPlaceRobot:
 
     def detect_cubes_w_anchor(self, image):
         objs_dist = []
-        image = cv2.imread('./test1.jpg')
+        # image = cv2.imread('./test1.jpg')
 
         # cube height
         cube_pickup_height = -120
@@ -191,7 +194,7 @@ class PickPlaceRobot:
                     objs_dist.append((robo_x, robo_y, cube_pickup_height))
         
         # Save and display the image with boxes
-        cv2.imwrite("cube_detection.jpg", image)
+        cv2.imwrite(f"cube_detection_{self.timestamp}.jpg", image)
 
         # Show the image in a window
         # TODO: Fix a crash when closing the image window

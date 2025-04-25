@@ -44,6 +44,8 @@ class PickPlaceRobot:
         self.arm_z_pt = self.arm_z_home_cord
         self.arm_gripper_angle = self.arm_gripper_home_angle
 
+        self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
     def img_x_correction(self, x_value):
         return 1.021 * x_value - 1.0
 
@@ -51,6 +53,10 @@ class PickPlaceRobot:
         return 0.96 * y_value + 5.28
     
     def reset_arm_postion(self):
+        self.arm_x_pt = self.arm_x_home_cord
+        self.arm_y_pt = self.arm_y_home_cord
+        self.arm_z_pt = self.arm_z_home_cord
+
         self.send_command(self.arm_x_home_cord, self.arm_y_home_cord, self.arm_z_home_cord, self.arm_gripper_home_angle)
 
     def open_gripper(self):
@@ -90,6 +96,8 @@ class PickPlaceRobot:
     def capture_image(self):
         # initialize the camera 
         cam = cv2.VideoCapture(CAM_PORT) 
+        cam.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+        cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 
         # reading the input using the camera 
         result, image = cam.read() 
@@ -97,11 +105,10 @@ class PickPlaceRobot:
         # If image will detected without any error, show result 
         if result:
             # Show captured image.
-            cv2.imshow("Captured Image", image) 
+            cv2.imshow("Captured Image", image)
 
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             # Save Image
-            cv2.imwrite(f"CapturedImage_{timestamp}.png", image) 
+            cv2.imwrite(f"CapturedImage_{self.timestamp}.png", image) 
 
             # If keyboard interrupt occurs, destroy image window 
             cv2.waitKey(0) 
@@ -114,7 +121,7 @@ class PickPlaceRobot:
 
     def detect_cubes_w_anchor(self, image):
         objs_dist = []
-        image = cv2.imread('./test1.jpg')
+        # image = cv2.imread('./test1.jpg')
 
         # cube height
         cube_pickup_height = -120
@@ -188,11 +195,11 @@ class PickPlaceRobot:
                 print(f"    Distance from center in mm (x, y): {distance_x, distance_y}.\n")
                 print(f"    Roboarm (X,Y): {robo_x, robo_y}\n")
 
-                if label == 'redcube':
-                    objs_dist.append((robo_x, robo_y, cube_pickup_height,label))
+                # if label == 'redcube':
+                objs_dist.append((robo_x, robo_y, cube_pickup_height, label))
         
         # Save and display the image with boxes
-        cv2.imwrite("cube_detection.jpg", image)
+        cv2.imwrite(f"cube_detection_{self.timestamp}.jpg", image)
 
         # Show the image in a window
         # TODO: Fix a crash when closing the image window
@@ -275,9 +282,6 @@ class PickPlaceRobot:
         pass
 
     def pick_object(self,x,y,z):
-        # x_img, y_img = objs[0]
-        # x, y, z = self.image_to_arm_base(x_img, y_img)
-
         self.open_gripper()
         time.sleep(5)
         self.move_arm(x, y, z)
@@ -285,22 +289,16 @@ class PickPlaceRobot:
         self.close_gripper()
         time.sleep(5)
         self.reset_arm_postion()
-
-
+        time.sleep(5)
 
     #Simple function to place object in new position. 
     def place_object(self,x,y,z):
-
-
         self.move_arm(x, y, z)
-        time.sleep(1)
+        time.sleep(5)
         self.open_gripper()
-        time.sleep(1)
+        time.sleep(5)
         self.reset_arm_postion()
-        self.close_gripper()
-        time.sleep(1)
-
-
+        time.sleep(5)
 
     #Sort multiple objects by distance from anchor for pick and place  
     def sort_cubes(self): 
@@ -311,30 +309,23 @@ class PickPlaceRobot:
         # Yellow cube (or any origin cube) location in Roboarm coordinates
         anchor_origin_x_mm = 8
         anchor_origin_y_mm = -85
-        
 
         #Sets initial Arm Position 
         self.reset_arm_postion()
-        #image = self.capture_image()
-        image = "./WIN_20250413_15_49_33_Pro.jpg"
+        # image = self.capture_image()
+        image = cv2.imread('./test.jpg')
 
         #objs = self.detect_cubes(image)
         objs = self.detect_cubes_w_anchor(image)
-
-
-        #Determine sort starting positions by color from anchor. 
-        # color_start = []
-        # for i,color in enumerate(cubes_labels):
-        #     x = anchor_origin_x_mm 
-        #     y = anchor_origin_y_mm + (i * 10)
-        #     z = cube_pickup_height
-        #     color_start.append((x, y, z, color))
+        print(f"objs = {objs}")
         
         #color Map
-        color_positions = {
-            color: [anchor_origin_x_mm + 40, anchor_origin_y_mm + (i * 25), cube_pickup_height]
-            for i, color in enumerate(cubes_labels)
-        }
+        color_positions = {}
+        idx = 0
+        for i, color in enumerate(cubes_labels):
+            if color != 'yellowcube':
+                color_positions[color] = [anchor_origin_x_mm + ((idx+1) * 40), anchor_origin_y_mm, cube_pickup_height]
+                idx += 1
 
         #Determine Sort Positions based on distance from Anchor 
         obj_dist = []
@@ -345,30 +336,10 @@ class PickPlaceRobot:
             dist = math.sqrt((x - anchor_origin_x_mm)**2 + (y - anchor_origin_y_mm)**2)
             obj_dist.append([x, y, z, label , dist])
 
-        # Sort objects by distance from anchor
+        # Sort objects by distance from anchor 
         sorted_obj = sorted(obj_dist, key=lambda dist: dist[4])
+        print(f"sorted_obj = {sorted_obj}")
 
-
-        #Automation for sorted objects. 
-        #obj_new_xy = [[] for x,y,z,label,dist in objs]
-        
-        # for i, current in enumerate(sorted_obj):
-        #     x, y, z, label, dist = current
-        #     # Find the corresponding color start position
-        #     for j, (color_x, color_y, color_z, color) in enumerate(color_start):
-        #         if label == color:
-        #             #Move Object
-        #             self.pick_object(x, y, z)
-        #             self.place_object(color_x, color_y, color_z)
-        #             time.sleep(1)
-        #             #update color start position for next object
-        #             color_start[j] = (color_x, color_y + 10, color_z, color)
-        #             break
-
-        #Color Map Update
-        #for x, y, z, label,dist in sorted_obj:
-        i = 0
-        #while i < len(sorted_obj):
         while sorted_obj != [] :
             x, y, z, label, dist = sorted_obj[0]
             if x != anchor_origin_x_mm and y != anchor_origin_y_mm:    
@@ -380,42 +351,21 @@ class PickPlaceRobot:
 
                     print(f"\nOriginal XY ------    X: {x}, Y: {y}, Z: {z}, Label: {label}")
                     print(f"New XY ------ X: {color_x}, Y: {color_y}, Z: {color_z}, Label: {label}")
-
-                    # Move Object   
-                            #Check if the current cube is within the 13mm boundary
                     
-                    # is_obstructed = any((x_sorted < color_x - 13 or x_sorted > color_x + 13 or
-                    # y_sorted < color_y - 13 or y_sorted > color_y + 13)
-                    # for x_sorted, y_sorted, _, _, _ in sorted_obj if (x_sorted, y_sorted) != (x, y))
-
-                    # if is_obstructed:
-                    #     #check for obstructing objects. move to back of array if so
-                    #     print(f"Object {label} is obstructing the path. Skipping for now...")
-                    #     sorted_obj.append(sorted_obj.pop(i))  # Move to end of list
-
-                        #x_end, y_end, z_end, label_end, dist_end = sorted_obj[-1]
-                        #sorted_obj.remove([x, y, z, label,dist])
-                        #sorted_obj.append([x_end, y_end, z_end, label_end, dist_end])                    
-                        
-                    #else:
-                        # Move to object position
                     self.pick_object(x, y, z)
+                    
                     self.place_object(color_x, color_y, color_z)
-
-                    time.sleep(1)
                 
                     # Update x position for next object
-                    color_positions[label][0] += 25
+                    color_positions[label][1] -= 25
                     #  i += 1
                     sorted_obj.remove([x, y, z, label,dist])
 
                 except Exception as e: 
                     print(f"An error occured {e}")
                     break
-                
-
-
-
+            else:
+                sorted_obj.remove([x, y, z, label,dist])
         
     def connect_arm(self):
         """Connects to the Robot Arm Wi-Fi hotspot."""
