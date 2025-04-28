@@ -12,9 +12,13 @@ if __name__=='__main__':
     # Train the model
     results = model.train(data="./colorcubes_v7i/data.yaml", 
                           epochs=1000,
+                          patience=300,
+                          lr0=0.05,
+                          lrf=0.05,
                           imgsz=640,
                           batch=0.9,
-                          plots=True)
+                          plots=True,
+                          optimizer="SGD")
 
     # Save the trained model
     model.save("../models/colorcubes7.pt")  # Save the model to a file

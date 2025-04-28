@@ -15,13 +15,15 @@ import math
 root = tk.Tk()
 root.withdraw()  # Hide the main tkinter window
 
-model = YOLO("runs/detect/train29/weights/best.pt")
+# model = YOLO("runs/detect/train29/weights/best.pt")
+model = YOLO("../models/colorcubes7.pt")
 
 CAM_PORT = 1
 PIXEL_TO_MM = 2.618
 GRIPPER_OPEN_ANGLE = 1.62
 GRIPPER_CLOSED_ANGLE = 3.24
 
+BETWEEN_ACTION_SLEEP_TIME = 2
 
 CAMERA_TO_ARM_BASE = 45.7 # mm
 
@@ -94,7 +96,7 @@ class PickPlaceRobot:
             print(f"Network error: {e}")
 
     def capture_image(self):
-        # initialize the camera 
+        # Initialize camera with proper resolution
         cam = cv2.VideoCapture(CAM_PORT) 
         cam.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
         cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
@@ -104,6 +106,7 @@ class PickPlaceRobot:
 
         # If image will detected without any error, show result 
         if result:
+            cv2.namedWindow("Captured Image")
             # Show captured image.
             cv2.imshow("Captured Image", image)
 
@@ -112,7 +115,7 @@ class PickPlaceRobot:
 
             # If keyboard interrupt occurs, destroy image window 
             cv2.waitKey(0) 
-            cv2.destroyWindow("Captured Image")
+            cv2.destroyAllWindows()
 
             return image
         # If captured image is corrupted, moving to else part 
@@ -283,22 +286,22 @@ class PickPlaceRobot:
 
     def pick_object(self,x,y,z):
         self.open_gripper()
-        time.sleep(5)
+        time.sleep(BETWEEN_ACTION_SLEEP_TIME)
         self.move_arm(x, y, z)
-        time.sleep(5)
+        time.sleep(BETWEEN_ACTION_SLEEP_TIME)
         self.close_gripper()
-        time.sleep(5)
+        time.sleep(BETWEEN_ACTION_SLEEP_TIME)
         self.reset_arm_postion()
-        time.sleep(5)
+        time.sleep(BETWEEN_ACTION_SLEEP_TIME)
 
     #Simple function to place object in new position. 
     def place_object(self,x,y,z):
         self.move_arm(x, y, z)
-        time.sleep(5)
+        time.sleep(BETWEEN_ACTION_SLEEP_TIME)
         self.open_gripper()
-        time.sleep(5)
+        time.sleep(BETWEEN_ACTION_SLEEP_TIME)
         self.reset_arm_postion()
-        time.sleep(5)
+        time.sleep(BETWEEN_ACTION_SLEEP_TIME)
 
     #Sort multiple objects by distance from anchor for pick and place  
     def sort_cubes(self): 
@@ -312,8 +315,7 @@ class PickPlaceRobot:
 
         #Sets initial Arm Position 
         self.reset_arm_postion()
-        # image = self.capture_image()
-        image = cv2.imread('./test.jpg')
+        image = self.capture_image()
 
         #objs = self.detect_cubes(image)
         objs = self.detect_cubes_w_anchor(image)
@@ -324,7 +326,7 @@ class PickPlaceRobot:
         idx = 0
         for i, color in enumerate(cubes_labels):
             if color != 'yellowcube':
-                color_positions[color] = [anchor_origin_x_mm + ((idx+1) * 40), anchor_origin_y_mm, cube_pickup_height]
+                color_positions[color] = [anchor_origin_x_mm + ((idx+1) * 50), anchor_origin_y_mm, cube_pickup_height]
                 idx += 1
 
         #Determine Sort Positions based on distance from Anchor 
@@ -340,11 +342,11 @@ class PickPlaceRobot:
         sorted_obj = sorted(obj_dist, key=lambda dist: dist[4])
         print(f"sorted_obj = {sorted_obj}")
 
+        print(f"\Starting Color Positions: {color_positions}")
         while sorted_obj != [] :
             x, y, z, label, dist = sorted_obj[0]
             if x != anchor_origin_x_mm and y != anchor_origin_y_mm:    
                 try:
-                    print(f"\nCurrent Color Positions: {color_positions}")
                     print(f"Current Queue:  {sorted_obj}")
                     # Find the corresponding color start position
                     color_x, color_y, color_z = color_positions[label]
@@ -354,10 +356,12 @@ class PickPlaceRobot:
                     
                     self.pick_object(x, y, z)
                     
-                    self.place_object(color_x, color_y, color_z)
+                    self.place_object(color_x, color_y, color_z+20)
+                    print(f"Place object at X:{color_x}, Y: {color_y}, Z: {color_z+20}")
                 
                     # Update x position for next object
-                    color_positions[label][1] -= 25
+                    color_positions[label][1] += 25
+                    print(f"New Y for {label}, Y: {color_positions[label][1]}")
                     #  i += 1
                     sorted_obj.remove([x, y, z, label,dist])
 
